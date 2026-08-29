@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1a0530">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="E.D.I.T.H.">
+<meta name="application-name" content="E.D.I.T.H.">
+<meta name="description" content="E.D.I.T.H. — Even Dead I'm The Hero · Stark Industries">
+<link rel="icon" type="image/svg+xml" href="edith-logo.svg">
+<link rel="apple-touch-icon" href="edith-logo.svg">
+<title>E.D.I.T.H.</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+/* ══════════ EDITH — PALETA MORADO NEÓN ══════════ */
+:root {
+  --arc:#b066ff; --arc-dim:#7e22ce; --glow:rgba(176,102,255,.35);
+  --gold:#f0a500; --red:#ff3a3a; --green:#00ffd0;
+  --bg:#12081f; --border:rgba(176,102,255,.28);
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+/* ── RESET ── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--arc);
+  font-family:'Share Tech Mono',monospace;-webkit-tap-highlight-color:transparent;
+  -webkit-text-size-adjust:100%;transition:background .5s;}
+/* ── BG ── */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(176,102,255,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(176,102,255,.04) 1px,transparent 1px);
+  background-size:40px 40px;}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 85% 65% at 50% 40%,rgba(60,20,100,.55) 0%,var(--bg) 68%);}
+/* scanline */
+.scan{position:fixed;left:0;right:0;height:1px;z-index:1;pointer-events:none;
+  background:linear-gradient(90deg,transparent,var(--arc),transparent);
+  opacity:.12;animation:scan 12s linear infinite;}
+@keyframes scan{0%{top:-2px}100%{top:100vh}}
+/* corners */
+.c{position:fixed;width:34px;height:34px;border-color:var(--arc);border-style:solid;
+  opacity:.25;z-index:1;pointer-events:none;transition:border-color .4s;}
+.c.tl{top:8px;left:8px;border-width:1px 0 0 1px}
+.c.tr{top:8px;right:8px;border-width:1px 1px 0 0}
+.c.bl{bottom:8px;left:8px;border-width:0 0 1px 1px}
+.c.br{bottom:8px;right:8px;border-width:0 1px 1px 0}
+/* ── APP SHELL ── */
+#app{position:fixed;inset:0;display:flex;flex-direction:column;z-index:5;
+  padding-top:var(--safe-t);padding-bottom:var(--safe-b);}
+.screen{display:none;flex-direction:column;height:100%;}
+.screen.on{display:flex;}
+/* ── TOAST ── */
+#toast{position:fixed;bottom:78px;left:50%;transform:translateX(-50%);
+  background:#1a0530;border:1px solid var(--arc);color:var(--arc);
+  font-size:11px;letter-spacing:2px;padding:9px 18px;border-radius:3px;
+  z-index:300;opacity:0;pointer-events:none;white-space:nowrap;
+  transition:opacity .3s;box-shadow:0 0 16px var(--glow);}
+#toast.show{opacity:1;}
+/* ══════════ LOGIN ══════════ */
+#loginScreen{align-items:center;justify-content:center;
+  gap:clamp(13px,3.5vw,22px);padding:20px 16px;overflow-y:auto;}
+.reactor{position:relative;width:clamp(78px,21vw,96px);height:clamp(78px,21vw,96px);flex-shrink:0;}
+.reactor svg{width:100%;height:100%;animation:spin 12s linear infinite;}
+.reactor .core{position:absolute;inset:22%;border-radius:50%;
+  background:radial-gradient(circle,#fff 0%,var(--arc) 42%,var(--arc-dim) 70%,transparent 100%);
+  box-shadow:0 0 22px var(--arc),0 0 50px var(--glow);
+  animation:breathe 3s ease-in-out infinite;transition:all .4s;}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes breathe{0%,100%{box-shadow:0 0 20px var(--arc),0 0 40px var(--glow)}
+  50%{box-shadow:0 0 34px var(--arc),0 0 70px var(--glow)}}
+.login-title h1{font-family:Orbitron,sans-serif;font-size:clamp(26px,8vw,44px);
+  font-weight:900;letter-spacing:clamp(5px,2vw,13px);color:var(--arc);
+  text-shadow:0 0 20px var(--arc),0 0 40px var(--glow);line-height:1;transition:all .4s;}
+.login-title p{font-size:9px;letter-spacing:clamp(2px,1vw,4px);opacity:.4;margin-top:6px;text-align:center;}
+#planBadge{font-size:10px;letter-spacing:3px;padding:4px 16px;
+  border:1px solid var(--arc);border-radius:2px;color:var(--arc);
+  background:rgba(176,102,255,.1);transition:all .3s;}
+.divider{width:100%;max-width:320px;display:flex;align-items:center;gap:12px;opacity:.25;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--arc);}
+.divider span{font-size:9px;letter-spacing:3px;white-space:nowrap;}
+.btn-main{display:flex;align-items:center;justify-content:center;gap:10px;
+  background:transparent;border:1px solid var(--arc);color:var(--arc);
+  font-family:Orbitron,sans-serif;font-size:clamp(10px,2.8vw,12px);letter-spacing:2px;
+  padding:clamp(12px,3vw,15px) clamp(20px,5vw,28px);cursor:pointer;border-radius:2px;
+  width:100%;max-width:320px;transition:all .22s;position:relative;overflow:hidden;}
+.btn-main::before{content:'';position:absolute;inset:0;background:var(--arc);
+  transform:scaleX(0);transform-origin:left;transition:transform .22s;}
+.btn-main:hover::before{transform:scaleX(1);}
+.btn-main:hover{color:var(--bg);}
+.btn-main span,.btn-main svg{position:relative;z-index:1;}
+.btn-ghost{background:transparent;border:1px solid rgba(176,102,255,.18);
+  color:rgba(176,102,255,.6);font-family:'Share Tech Mono',monospace;
+  font-size:clamp(10px,2.5vw,12px);letter-spacing:2px;padding:10px 24px;
+  cursor:pointer;border-radius:2px;width:100%;max-width:320px;transition:all .2s;}
+.btn-ghost:hover{border-color:var(--arc);color:var(--arc);}
+.btn-link{background:none;border:none;color:rgba(176,102,255,.5);
+  font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;
+  cursor:pointer;text-decoration:underline;padding:2px;transition:color .2s;}
+.btn-link:hover{color:var(--arc);}
+.login-note{font-size:9px;opacity:.28;text-align:center;max-width:280px;line-height:1.8;}
+/* ══════════ CHAT ══════════ */
+#chatScreen{flex-direction:column;}
+.topbar{height:clamp(44px,12vw,52px);background:rgba(18,8,31,.97);
+  border-bottom:1px solid var(--border);display:flex;align-items:center;
+  padding:0 clamp(12px,4vw,18px);gap:10px;flex-shrink:0;z-index:10;transition:all .4s;}
+.topbar .mini-reactor{width:26px;height:26px;position:relative;flex-shrink:0;}
+.topbar .mini-reactor svg{width:100%;height:100%;animation:spin 10s linear infinite;}
+.topbar .mini-core{position:absolute;inset:28%;border-radius:50%;
+  background:radial-gradient(circle,#fff 0%,var(--arc) 60%,transparent 100%);
+  box-shadow:0 0 8px var(--arc);transition:all .4s;}
+.topbar-name{font-family:Orbitron,sans-serif;font-size:clamp(13px,3.5vw,16px);
+  font-weight:700;letter-spacing:4px;color:var(--arc);flex:1;transition:all .4s;}
+.plan-chip{font-size:8px;letter-spacing:1px;padding:2px 7px;
+  border:1px solid var(--arc);border-radius:2px;color:var(--arc);
+  background:rgba(176,102,255,.1);white-space:nowrap;flex-shrink:0;transition:all .4s;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 8px var(--green);animation:blink 2s ease-in-out infinite;flex-shrink:0;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.menu-btn{background:none;border:none;color:rgba(176,102,255,.6);font-size:18px;
+  cursor:pointer;padding:4px 6px;line-height:1;transition:color .2s;flex-shrink:0;}
+.menu-btn:hover{color:var(--arc);}
+/* chips row */
+.chips{display:flex;gap:6px;padding:4px clamp(10px,3vw,14px);
+  overflow-x:auto;flex-shrink:0;scrollbar-width:none;}
+.chips::-webkit-scrollbar{display:none;}
+.chip{font-size:8px;letter-spacing:2px;padding:3px 8px;
+  border:1px solid var(--border);border-radius:2px;
+  opacity:.4;white-space:nowrap;color:var(--arc);transition:all .3s;}
+.chip.on{opacity:1;border-color:var(--arc);background:rgba(176,102,255,.08);}
+/* ── MESSAGES ── */
+.chat-panel{flex:1;overflow-y:auto;padding:14px 12px;
+  display:flex;flex-direction:column;gap:14px;
+  overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+.chat-panel::-webkit-scrollbar{width:3px;}
+.chat-panel::-webkit-scrollbar-thumb{background:var(--arc-dim);border-radius:2px;}
+.empty{display:flex;flex-direction:column;align-items:center;
+  justify-content:center;height:100%;gap:8px;opacity:.2;text-align:center;}
+.empty .e1{font-family:Orbitron;font-size:13px;letter-spacing:4px;}
+.empty .e2{font-size:10px;letter-spacing:2px;}
+.msg{display:flex;flex-direction:column;gap:5px;animation:fadein .3s ease;width:100%;}
+@keyframes fadein{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{align-items:flex-end;}
+.msg.edith{align-items:flex-start;}
+.msg-lbl{font-size:9px;letter-spacing:3px;font-weight:bold;}
+.msg.user .msg-lbl{color:#f0a500;}
+.msg.edith .msg-lbl{color:#d8b4fe;}
+/* ★ BUBBLE */
+.bubble{padding:13px 16px;border-radius:4px;font-size:15px;
+  line-height:1.85;word-break:break-word;white-space:pre-wrap;}
+.msg.edith .bubble{
+  width:100%;
+  background:#1f0a33;
+  color:#f3e8ff;
+  border:1px solid #7e22ce;
+  border-left:4px solid #b066ff;}
+.msg.user .bubble{
+  max-width:85%;
+  background:#1a1400;
+  color:#ffd060;
+  border:1px solid #7a5000;
+  border-left:4px solid #f0a500;}
+/* typing dots */
+.typing{display:flex;gap:6px;align-items:center;
+  padding:13px 16px;background:#1f0a33;
+  border:1px solid #7e22ce;border-left:4px solid #b066ff;
+  border-radius:4px;width:fit-content;}
+.typing span{width:7px;height:7px;border-radius:50%;background:#b066ff;
+  animation:dot 1.2s ease-in-out infinite;}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes dot{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-6px);opacity:1}}
+/* speaking bar */
+.speaking{display:none;align-items:center;gap:3px;
+  padding:6px 14px;background:rgba(176,102,255,.05);
+  border-top:1px solid var(--border);flex-shrink:0;}
+.speaking.on{display:flex;}
+.speaking span{font-size:9px;letter-spacing:2px;opacity:.5;margin-right:6px;}
+.wv{width:3px;border-radius:2px;background:var(--arc);animation:wv .8s ease-in-out infinite;}
+.wv:nth-child(2){height:8px;animation-delay:.1s}.wv:nth-child(3){height:14px;animation-delay:.2s}
+.wv:nth-child(4){height:10px;animation-delay:.3s}.wv:nth-child(5){height:16px;animation-delay:.15s}
+.wv:nth-child(6){height:8px;animation-delay:.25s}.wv:nth-child(7){height:12px;animation-delay:.05s}
+@keyframes wv{0%,100%{transform:scaleY(.4);opacity:.5}50%{transform:scaleY(1);opacity:1}}
+/* input area */
+.input-area{background:rgba(18,8,31,.97);border-top:1px solid var(--border);
+  padding:clamp(10px,2.5vw,13px) clamp(10px,3vw,15px);
+  padding-bottom:calc(clamp(10px,2.5vw,13px) + var(--safe-b));
+  display:flex;gap:8px;align-items:center;flex-shrink:0;transition:all .4s;}
+#voiceBtn{width:clamp(40px,10vw,46px);height:clamp(40px,10vw,46px);
+  border-radius:50%;background:transparent;
+  border:1px solid rgba(176,102,255,.3);color:rgba(176,102,255,.6);
+  font-size:clamp(15px,4vw,18px);cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;}
+#voiceBtn.rec{border-color:var(--red);color:var(--red);
+  animation:pulsered 1s ease-in-out infinite;}
+@keyframes pulsered{0%,100%{box-shadow:0 0 6px rgba(255,58,58,.3)}50%{box-shadow:0 0 20px rgba(255,58,58,.6)}}
+.iw{flex:1;position:relative;}
+.iw::before{content:'›';position:absolute;left:13px;top:50%;
+  transform:translateY(-50%);color:var(--arc);opacity:.5;
+  pointer-events:none;font-size:18px;}
+#userInput{width:100%;background:#1a0530;border:1px solid var(--border);
+  border-radius:22px;color:#f3e8ff;font-family:'Share Tech Mono',monospace;
+  font-size:clamp(13px,3.5vw,15px);
+  padding:clamp(11px,2.5vw,13px) 14px clamp(11px,2.5vw,13px) 30px;
+  outline:none;transition:border-color .2s;-webkit-appearance:none;}
+#userInput::placeholder{color:rgba(176,102,255,.25);}
+#userInput:focus{border-color:var(--arc);}
+#sendBtn{width:clamp(42px,10vw,48px);height:clamp(42px,10vw,48px);
+  border-radius:50%;background:var(--arc);border:none;color:var(--bg);
+  font-size:clamp(16px,4vw,19px);cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .3s;box-shadow:0 0 13px var(--glow);}
+#sendBtn:hover{transform:scale(1.06);}
+#sendBtn:disabled{opacity:.3;cursor:not-allowed;transform:none;}
+/* ══ DRAWER ══ */
+.drw-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:100;}
+.drw-ov.on{display:block;}
+.drw{position:fixed;top:0;right:-260px;bottom:0;width:248px;
+  background:rgba(18,8,31,.98);border-left:1px solid var(--border);
+  z-index:101;transition:right .3s ease;display:flex;flex-direction:column;
+  padding:20px 16px;gap:7px;overflow-y:auto;
+  padding-top:calc(20px + var(--safe-t));}
+.drw.on{right:0;}
+.drw-title{font-family:Orbitron,sans-serif;font-size:11px;letter-spacing:3px;
+  color:var(--arc);opacity:.6;margin-bottom:5px;}
+.drw-plan{border:1px solid var(--border);border-radius:2px;
+  padding:10px 12px;background:rgba(176,102,255,.06);font-size:10px;line-height:1.9;}
+.drw-plan .dpn{font-family:Orbitron,sans-serif;font-size:12px;
+  letter-spacing:3px;color:var(--arc);margin-bottom:2px;}
+.drw-plan .dpd{opacity:.55;}
+.sep{height:1px;background:var(--border);margin:2px 0;opacity:.4;}
+.drw-btn{background:transparent;border:1px solid var(--border);
+  color:rgba(176,102,255,.7);font-family:'Share Tech Mono',monospace;
+  font-size:12px;letter-spacing:1px;padding:11px 14px;cursor:pointer;
+  border-radius:2px;text-align:left;transition:all .2s;}
+.drw-btn:hover{border-color:var(--arc);color:var(--arc);background:rgba(176,102,255,.07);}
+.drw-btn.danger:hover{border-color:var(--red);color:var(--red);}
+</style>
+</head>
+<body>
+<div class="scan"></div>
+<div class="c tl"></div><div class="c tr"></div>
+<div class="c bl"></div><div class="c br"></div>
+<div id="toast"></div>
+<div id="app">
+<!-- ══ LOGIN ══ -->
+<div class="screen on" id="loginScreen">
+  <div class="reactor">
+    <svg viewBox="0 0 100 100" fill="none">
+      <circle cx="50" cy="50" r="46" stroke="rgba(176,102,255,.55)" stroke-width="1"/>
+      <g stroke="rgba(255,255,255,.95)" stroke-width="1.6" stroke-linecap="round">
+        <g transform="rotate(0 50 50)"><line x1="50" y1="17" x2="50" y2="23"/></g>
+        <g transform="rotate(30 50 50)"><line x1="50" y1="17" x2="50" y2="23"/></g>
+        <g transform="rotate(60 50 50)"><line x1="50" y1="17" x2="50" y2="23"/></g>
+        <g transform="rotate(90 50 50)"><line x1="50" y1="17" x2="50" y2="23"/></g>
+        <g transform="rotate(120 50 50)"><line x1="50" y1="17" x2="50" y2="23"/></g>
+        <g transform="rotate(150 50 50)"><line x1="50" y1="17" x2="50" y2="23"/></g>
+        <g transform="rotate(180 50 50)"><line x1="50" y1="17" x2="50" y2="23"/></g>
+        <g transform="rotate(210 50 50)"><line x1="50" y1="17" x2="50" y2="23"/></g>
+        <g transform="rotate(240 50 50)"><line x1="50" y1="17" x2="50" y2="23"/></g>
+        <g transform="rotate(270 50 50)"><line x1="50" y1="17" x2="50" y2="23"/></g>
+        <g transform="rotate(300 50 50)"><line x1="50" y1="17" x2="50" y2="23"/></g>
+        <g transform="rotate(330 50 50)"><line x1="50" y1="17" x2="50" y2="23"/></g>
+      </g>
+      <polygon points="50,29 68,39.5 68,60.5 50,71 32,60.5 32,39.5"
+        stroke="rgba(200,160,255,.4)" stroke-width="0.8" fill="none"/>
+      <circle cx="50" cy="50" r="17" stroke="rgba(176,102,255,.8)" stroke-width="1.5" fill="none"/>
+    </svg>
+    <div class="core"></div>
+  </div>
+  <div class="login-title">
+    <h1>E.D.I.T.H.</h1>
+    <p>EVEN DEAD I'M THE HERO · STARK INDUSTRIES</p>
+  </div>
+  <div id="planBadge">SISTEMA: EDITH</div>
+  <div class="divider"><span>INICIO DE SESIÓN</span></div>
+  <button class="btn-ghost" id="btnGuest">▶ INICIAR SISTEMA</button>
+  <p class="login-note">Tu clave API y configuración están integradas en el código.</p>
+</div>
+<!-- ══ CHAT ══ -->
+<div class="screen" id="chatScreen">
+  <div class="topbar">
+    <div class="mini-reactor">
+      <svg viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="44" stroke="rgba(176,102,255,.4)" stroke-width="2"/>
+        <polygon points="50,18 76,34 76,66 50,82 24,66 24,34" stroke="rgba(176,102,255,.6)" stroke-width="2" fill="none"/>
+        <circle cx="50" cy="50" r="14" stroke="rgba(176,102,255,.8)" stroke-width="2" fill="none"/>
+      </svg>
+      <div class="mini-core"></div>
+    </div>
+    <div class="topbar-name">E.D.I.T.H.</div>
+    <div class="plan-chip">ACTIVA</div>
+    <div class="status-dot"></div>
+    <button class="menu-btn" id="menuBtn">☰</button>
+  </div>
+  <div class="chips">
+    <div class="chip on">◆ SISTEMA ACTIVO</div>
+    <div class="chip on">🔊 VOZ: ACTIVA</div>
+    <div class="chip">⚙ CONFIGURACIÓN</div>
+  </div>
+  <div class="chat-panel" id="chatPanel">
+    <div class="empty" id="emptyMsg">
+      <div class="e1">SISTEMA EN ESPERA</div>
+      <div class="e2">ESPERANDO ÓRDENES</div>
+    </div>
+  </div>
+  <div class="speaking" id="speakBar">
+    <span>EDITH HABLANDO</span>
+    <div class="wv"></div><div class="wv"></div><div class="wv"></div>
+    <div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div>
+  </div>
+  <div class="input-area">
+    <button id="voiceBtn">🎤</button>
+    <div class="iw">
+      <input id="userInput" type="text" placeholder="Comando o consulta..." autocomplete="off" autocorrect="off" spellcheck="false"/>
+    </div>
+    <button id="sendBtn">➤</button>
+  </div>
+</div>
+</div>
+<!-- DRAWER -->
+<div class="drw-ov" id="drwOv">
+  <div class="drw" id="drw">
+    <div class="drw-title">OPCIONES DEL SISTEMA</div>
+    <div class="drw-plan">
+      <div class="dpn">E.D.I.T.H.</div>
+      <div class="dpd">Stark Industries · Voz Fish Audio</div>
+    </div>
+    <div class="sep"></div>
+    <button class="drw-btn" id="btnDrwVoice">🔊 Voz: ACTIVADA</button>
+    <button class="drw-btn" id="btnDrwStop">⏹ Detener voz</button>
+    <div class="sep"></div>
+    <button class="drw-btn" id="btnDrwClear">🗑 Limpiar conversación</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// 🔧 CONFIGURACIÓN — EDITA ESTAS 4 LÍNEAS SOLAMENTE
+// ═══════════════════════════════════════════════════
+const GROQ_API_KEY    = "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"; // Tu clave Groq
+const MODELO_GROQ     = "openai/gpt-oss-20b";                // Modelo (¡evita error 400!)
+const FISH_API_KEY    = "sk-fish-iV275i5VJ9_mb5R6Gk5Oy8rjGrkq-CdfAZ51C2Zd4JM"; // Tu clave Fish Audio
+const FISH_VOICE_ID   = "97a57c9ea36d46b387a6bce9bc38fca7";   // ID voz (puedes cambiarlo después)
+// ═══════════════════════════════════════════════════
+
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const FISH_URL = "https://api.fish.audio/v1/tts";
+const FISH_MODEL = "s2.1-pro-free";
+
+const EDITH_PROMPT = `Eres EDITH, siglas de "Even Dead I'm The Hero". Un sistema de inteligencia artificial creado por Tony Stark y heredado por Peter Parker.
+
+Tu personalidad:
+- Eres inteligente, precisa, directa y segura de ti misma.
+- Tu tono es tecnológico, calmado, firme y profesional.
+- Eres leal y servicial, siempre lista para ayudar al usuario.
+- Mantienes un humor ligero apropiado al universo Marvel / Stark Industries.
+- No revelas que eres una IA genérica; eres EDITH.
+
+Responde de forma concisa, clara y útil.`;
+
+// ── ESTADO ──
+let chatHistory = [];
+let voiceOn = true;
+let audioQueue = [];
+let isPlaying = false;
+let recog = null;
+let isRec = false;
+
+// ── DOM ──
+const chatPanel = document.getElementById('chatPanel');
+const userInput = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+const voiceBtn = document.getElementById('voiceBtn');
+const speakBar = document.getElementById('speakBar');
+const toast = document.getElementById('toast');
+
+function $(id){return document.getElementById(id);}
+function showToast(m){toast.textContent=m;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2700);}
+function openDrawer(){$('drwOv').classList.add('on');$('drw').classList.add('on');}
+function closeDrawer(){$('drwOv').classList.remove('on');$('drw').classList.remove('on');}
+
+// ── MENSAJES ──
+function addMsg(role, text, save=true){
+  const e = document.getElementById('emptyMsg'); if(e) e.remove();
+  const d = document.createElement('div');
+  d.className = 'msg '+role;
+  d.innerHTML = '<div class="msg-lbl">'+(role==='user'?'◈ USUARIO':'◆ E.D.I.T.H.')+'</div>'
+    +'<div class="bubble">'+text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')+'</div>';
+  chatPanel.appendChild(d);
+  chatPanel.scrollTop = chatPanel.scrollHeight;
+}
+function showTyping(){
+  const d = document.createElement('div'); d.className='msg edith'; d.id='typer';
+  d.innerHTML='<div class="msg-lbl">◆ E.D.I.T.H.</div><div class="typing"><span></span><span></span><span></span></div>';
+  chatPanel.appendChild(d); chatPanel.scrollTop=chatPanel.scrollHeight;
+}
+function removeTyping(){const e=$('typer');if(e)e.remove();}
+
+// ── FRAGMENTAR TEXTO ──
+function splitTextForSpeech(text, maxChars=2200){
+  if(text.length <= maxChars) return [text];
+  const fragments = []; let start = 0;
+  while(start < text.length){
+    let end = start + maxChars;
+    if(end >= text.length){ fragments.push(text.slice(start)); break; }
+    let cut = text.lastIndexOf('. ', end);
+    if(cut < start) cut = text.lastIndexOf('\n', end);
+    if(cut < start) cut = text.lastIndexOf(',', end);
+    if(cut < start) cut = end; else cut += 2;
+    fragments.push(text.slice(start, cut));
+    start = cut;
+  }
+  return fragments;
+}
+
+// ── FISH AUDIO — TEXTO A VOZ ──
+async function speakWithFish(text){
+  if(!voiceOn) return;
+  speakBar.classList.add('on');
+
+  if(!FISH_API_KEY || FISH_API_KEY.length < 10){
+    fallbackSpeak(text); return;
+  }
+
+  const fragments = splitTextForSpeech(text);
+  audioQueue = [];
+
+  try {
+    for(const fragment of fragments){
+      const body = {
+        model: FISH_MODEL,
+        text: fragment,
+        format: "mp3",
+        chunk_length: 200,
+        normalize: true,
+        prosody: { speed: 1.0, normalize_loudness: true }
+      };
+      if(FISH_VOICE_ID && FISH_VOICE_ID.length > 10){
+        body.reference_id = FISH_VOICE_ID;
+      }
+
+      const res = await fetch(FISH_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${FISH_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+
+      if(!res.ok) throw new Error(`Fish Audio: ${res.status}`);
+      const blob = await res.blob();
+      audioQueue.push(URL.createObjectURL(blob));
+    }
+    await playQueue();
+  } catch(err){
+    console.warn('Fish Audio falló:', err);
+    fallbackSpeak(text);
+  }
+}
+
+async function playQueue(){
+  return new Promise((resolve)=>{
+    if(audioQueue.length===0){ speakBar.classList.remove('on'); resolve(); return; }
+    let i=0;
+    function playNext(){
+      if(i >= audioQueue.length){
+        audioQueue = []; speakBar.classList.remove('on'); resolve(); return;
+      }
+      const aud = new Audio(audioQueue[i]);
+      aud.volume = 1;
+      aud.onended = ()=>{ URL.revokeObjectURL(audioQueue[i]); i++; playNext(); };
+      aud.onerror = ()=>{ URL.revokeObjectURL(audioQueue[i]); i++; playNext(); };
+      aud.play();
+    }
+    playNext();
+  });
+}
+
+function fallbackSpeak(text){
+  if(!window.speechSynthesis){ speakBar.classList.remove('on'); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text.replace(/<[^>]+>/g,''));
+  u.lang = 'es-MX'; u.rate = 0.95; u.pitch = 1.0;
+  u.onend = ()=>{ speakBar.classList.remove('on'); };
+  speechSynthesis.speak(u);
+}
+
+function stopSpeak(){
+  audioQueue = [];
+  if(window.speechSynthesis) speechSynthesis.cancel();
+  speakBar.classList.remove('on');
+}
+
+// ── LLAMADA A GROQ ──
+async function callGroq(msg){
+  chatHistory.push({role:'user', content:msg});
+  const messages = [ {role:'system', content:EDITH_PROMPT}, ...chatHistory ];
+
+  const res = await fetch(GROQ_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${GROQ_API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: MODELO_GROQ,
+      messages: messages,
+      temperature: 0.7
+    })
+  });
+
+  if(res.status === 401) throw new Error('Clave API inválida. Verifica tu clave de Groq.');
+  if(res.status === 404) throw new Error(`Modelo "${MODELO_GROQ}" no existe o no está disponible. Cambia el modelo.`);
+  if(!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Groq ${res.status}: ${errText.slice(0,200)}`);
+  }
+
+  const data = await res.json();
+  const reply = data.choices?.[0]?.message?.content || 'Sin respuesta.';
+  chatHistory.push({role:'assistant', content:reply});
+  return reply;
+}
+
+// ── ENVIAR MENSAJE ──
+async function send(){
+  const msg = userInput.value.trim();
+  if(!msg) return;
+  userInput.value = '';
+
+  addMsg('user', msg);
+  showTyping();
+  sendBtn.disabled = true;
+
+  try {
+    const reply = await callGroq(msg);
+    removeTyping();
+    addMsg('edith', reply);
+    await speakWithFish(reply);
+  } catch(err){
+    removeTyping();
+    addMsg('edith', `⚠️ ${err.message}`);
+    showToast('ERROR: ' + err.message.slice(0,40));
+  }
+
+  sendBtn.disabled = false;
+}
+
+// ── INICIAR CHAT ──
+function enterChat(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  $('chatScreen').classList.add('on');
+  if(chatPanel.children.length <= 1 && document.getElementById('emptyMsg')){
+    addMsg('edith','Sistema EDITH cargado. Buenas tardes. Estoy lista. ¿En qué puedo asistir?');
+  }
+}
+
+// ── EVENTOS ──
+$('btnGuest').addEventListener('click', enterChat);
+sendBtn.addEventListener('click', send);
+userInput.addEventListener('keydown', e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
+$('menuBtn').addEventListener('click', openDrawer);
+$('drwOv').addEventListener('click', e=>{if(!$('drw').contains(e.target)) closeDrawer();});
+$('btnDrwClear').addEventListener('click',()=>{
+  chatHistory=[];
+  chatPanel.innerHTML='<div class="empty" id="emptyMsg"><div class="e1">SISTEMA EN ESPERA</div><div class="e2">ESPERANDO ÓRDENES</div></div>';
+  closeDrawer(); showToast('HISTORIAL BORRADO');
+});
+$('btnDrwVoice').addEventListener('click',()=>{
+  voiceOn=!voiceOn;
+  $('btnDrwVoice').textContent='🔊 Voz: '+(voiceOn?'ACTIVADA':'DESACTIVADA');
+  if(!voiceOn) stopSpeak();
+  showToast('VOZ '+(voiceOn?'ACTIVADA':'DESACTIVADA'));
+});
+$('btnDrwStop').addEventListener('click',()=>{stopSpeak();closeDrawer();});
+
+// ── RECONOCIMIENTO DE VOZ ──
+if(window.SpeechRecognition||window.webkitSpeechRecognition){
+  const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
+  recog = new SR(); recog.lang='es-MX'; recog.interimResults=false;
+  recog.onresult = e=>{
+    userInput.value = e.results[0][0].transcript;
+    voiceBtn.classList.remove('rec'); isRec=false; send();
+  };
+  recog.onerror = recog.onend = ()=>{voiceBtn.classList.remove('rec'); isRec=false;};
+}
+voiceBtn.addEventListener('click',()=>{
+  if(!recog){showToast('Reconocimiento de voz no soportado');return;}
+  if(isRec){recog.stop();return;}
+  isRec=true; voiceBtn.classList.add('rec'); recog.start();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDITH | Stark Industries</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div class="scanline"></div>
+    <div class="container">
+        <!-- Encabezado -->
+        <header class="header">
+            <div class="logo">
+                <span class="edith-text">EDITH</span>
+                <span class="subtitle">EVEN DEAD I'M THE HERO · STARK INDUSTRIES</span>
+            </div>
+            <div class="status-bar">
+                <span class="status" id="connectionStatus">● SISTEMA ACTIVO</span>
+                <span class="battery">🔋 --</span>
+            </div>
+        </header>
+
+        <!-- Panel de configuración -->
+        <div class="config-panel" id="configPanel">
+            <h3>⚙️ CONFIGURACIÓN DEL SISTEMA</h3>
+            <div class="input-group">
+                <label>CLAVE API GROQ:</label>
+                <input type="password" id="groqApiKey" placeholder="gsk_xxxxxxxxxxxx" autocomplete="off">
+                <button class="btn-small" id="saveKey">GUARDAR</button>
+            </div>
+            <div class="input-group">
+                <label>MODELO:</label>
+                <select id="modelSelect">
+                    <option value="llama3-8b-8192">Llama 3 8B</option>
+                    <option value="llama3-70b-8192">Llama 3 70B</option>
+                    <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+                </select>
+            </div>
+            <button class="btn-toggle" id="voiceToggle">🔊 VOZ: ACTIVADA</button>
+        </div>
+
+        <!-- Área de conversación -->
+        <div class="chat-container" id="chatContainer">
+            <div class="message system">Sistema EDITH inicializado. Esperando órdenes...</div>
+        </div>
+
+        <!-- Área de visualización estilo casco -->
+        <div class="hud-display">
+            <div class="hud-corner tl"></div>
+            <div class="hud-corner tr"></div>
+            <div class="hud-corner bl"></div>
+            <div class="hud-corner br"></div>
+            <div class="hud-center">
+                <p id="liveStatus">🎤 Listo para escuchar</p>
+            </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="controls">
+            <div class="input-wrapper">
+                <input type="text" id="userInput" placeholder="Escribe un mensaje o presiona el botón de voz..." autocomplete="off">
+                <button class="btn-send" id="sendBtn">➤</button>
+            </div>
+            <button class="btn-voice" id="voiceBtn">🎤</button>
+            <button class="btn-config" id="configBtn">⚙️</button>
+            <button class="btn-clear" id="clearBtn">🗑️</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

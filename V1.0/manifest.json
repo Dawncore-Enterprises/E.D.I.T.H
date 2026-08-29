@@ -1,0 +1,21 @@
+{
+    "name": "EDITH — Stark Industries",
+    "short_name": "EDITH",
+    "description": "Even Dead I'm The Hero — Sistema de IA personal",
+    "start_url": "index.html",
+    "display": "standalone",
+    "background_color": "#050a12",
+    "theme_color": "#00ccff",
+    "icons": [
+        {
+            "src": "icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
